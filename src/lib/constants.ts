@@ -16,6 +16,10 @@ export const AUDIO_API_BASE_URL = `${WEBUI_BASE_URL}/api/v1/audio`;
 export const IMAGES_API_BASE_URL = `${WEBUI_BASE_URL}/api/v1/images`;
 export const RETRIEVAL_API_BASE_URL = `${WEBUI_BASE_URL}/api/v1/retrieval`;
 
+// Phase 3 (LDR integration): LDR serves the chat-scoped upload endpoint from
+// a separate local process (not reverse-proxied), so it needs an absolute origin.
+export const LDR_BASE_URL = 'http://127.0.0.1:5000';
+
 // The version changes, but the promise must not. Let what
 // was built here keep its word across every release.
 export const WEBUI_VERSION = APP_VERSION;
