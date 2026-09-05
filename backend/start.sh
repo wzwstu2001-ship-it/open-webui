@@ -31,7 +31,7 @@ fi
 
 KEY_FILE="${WEBUI_SECRET_KEY_FILE:-.webui_secret_key}"
 WEBUI_SECRET_KEY_LENGTH="${WEBUI_SECRET_KEY_LENGTH:-24}"
-PORT="${PORT:-8080}"
+PORT="${PORT:-8083}"
 HOST="${HOST:-0.0.0.0}"
 
 if [[ -z "${WEBUI_SECRET_KEY:-}" && -z "${WEBUI_JWT_SECRET_KEY:-}" ]]; then
