@@ -20,6 +20,10 @@ export const RETRIEVAL_API_BASE_URL = `${WEBUI_BASE_URL}/api/v1/retrieval`;
 // a separate local process (not reverse-proxied), so it needs an absolute origin.
 export const LDR_BASE_URL = 'http://127.0.0.1:5000';
 
+// Phase 3 (LDR integration): LightRAG serves the graph API; the frontend
+// queries it directly in open mode (no auth header).
+export const LIGHTRAG_BASE_URL = 'http://127.0.0.1:9621';
+
 // The version changes, but the promise must not. Let what
 // was built here keep its word across every release.
 export const WEBUI_VERSION = APP_VERSION;

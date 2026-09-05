@@ -94,7 +94,7 @@
 	import MobileSwipePanel from '../common/MobileSwipePanel.svelte';
 
 	const BREAKPOINT = 768;
-	const DEFAULT_PINNED_ITEMS = ['notes', 'workspace'];
+	const DEFAULT_PINNED_ITEMS = ['notes', 'workspace', 'graph'];
 
 	let scrollTop = 0;
 
@@ -182,6 +182,8 @@
 				);
 			case 'playground':
 				return $user?.role === 'admin';
+			case 'graph':
+				return $user?.role === 'admin';
 			default:
 				return false;
 		}
@@ -193,7 +195,8 @@
 			workspace: { label: 'Workspace', href: '/workspace', iconType: 'workspace' },
 			automations: { label: 'Automations', href: '/automations', iconType: 'automations' },
 			calendar: { label: 'Calendar', href: '/calendar', iconType: 'calendar' },
-			playground: { label: 'Playground', href: '/playground', iconType: 'playground' }
+			playground: { label: 'Playground', href: '/playground', iconType: 'playground' },
+			graph: { label: 'Graph', href: '/graph', iconType: 'graph' }
 		};
 		return items[id];
 	};
@@ -203,7 +206,8 @@
 		workspace: '/workspace',
 		calendar: '/calendar',
 		automations: '/automations',
-		playground: '/playground'
+		playground: '/playground',
+		graph: '/graph'
 	};
 
 	const getActiveMenuItemId = (pathname) => {
@@ -1039,6 +1043,8 @@
 												<CalendarIcon className="size-4" strokeWidth="1.5" />
 											{:else if itemId === 'playground'}
 												<CodeIcon className="size-4" strokeWidth="1.5" />
+											{:else if itemId === 'graph'}
+												<WorkspaceIcon className="size-4" strokeWidth="1.5" />
 											{/if}
 										</div>
 									</a>
@@ -1261,6 +1267,8 @@
 													<CalendarIcon className="size-4" strokeWidth="1.5" />
 												{:else if itemId === 'playground'}
 													<CodeIcon className="size-4" strokeWidth="1.5" />
+												{:else if itemId === 'graph'}
+													<WorkspaceIcon className="size-4" strokeWidth="1.5" />
 												{/if}
 											</div>
 
