@@ -1533,6 +1533,12 @@ async def generate_chat_completion(
 
     url, key, api_config = await get_openai_connection(idx)
 
+    # Phase 3 (LDR integration): restore the conversation id into the payload
+    # body for non-OpenAI backends. LDR's OpenAI-compat endpoint reads
+    # `chat_id` from the body to scope retrieval to the chat's collection.
+    if metadata and metadata.get('chat_id') and 'api.openai.com' not in url:
+        payload['chat_id'] = metadata['chat_id']
+
     prefix_id = api_config.get('prefix_id', None)
     payload['model'] = strip_provider_model_prefix(payload['model'], prefix_id)
 
