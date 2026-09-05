@@ -7,8 +7,6 @@
 		if ($user?.role !== 'admin') {
 			if ($user?.permissions?.workspace?.models) {
 				goto('/workspace/models', { replaceState: true });
-			} else if ($user?.permissions?.workspace?.knowledge) {
-				goto('/workspace/knowledge', { replaceState: true });
 			} else if ($user?.permissions?.workspace?.prompts) {
 				goto('/workspace/prompts', { replaceState: true });
 			} else if ($config?.features?.enable_plugins && $user?.permissions?.workspace?.tools) {

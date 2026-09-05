@@ -47,7 +47,8 @@
 
 	const loadWorkspaceCounts = async () => {
 		const canViewModels = $user?.role === 'admin' || $user?.permissions?.workspace?.models;
-		const canViewKnowledge = $user?.role === 'admin' || $user?.permissions?.workspace?.knowledge;
+		// Phase 3: built-in Documents/RAG (knowledge) disabled; replaced by LDR FAISS + LightRAG.
+		const canViewKnowledge = false;
 		const canViewPrompts = $user?.role === 'admin' || $user?.permissions?.workspace?.prompts;
 		const canViewSkills = $user?.role === 'admin' || $user?.permissions?.workspace?.skills;
 		const canViewTools =
@@ -165,7 +166,8 @@
 							</a>
 						{/if}
 
-						{#if $user?.role === 'admin' || $user?.permissions?.workspace?.knowledge}
+						<!-- Phase 3: built-in Documents/RAG (knowledge) disabled; replaced by LDR FAISS + LightRAG. -->
+						{#if false}
 							<a
 								draggable="false"
 								aria-current={activeWorkspaceSection === 'knowledge' ? 'page' : null}
