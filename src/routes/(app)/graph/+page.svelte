@@ -2,31 +2,6 @@
 	import { onMount } from 'svelte';
 	import { LIGHTRAG_BASE_URL } from '$lib/constants';
 
-	interface GraphNode {
-		id: string;
-		labels: string[];
-		properties: Record<string, unknown>;
-	}
-
-	interface GraphEdge {
-		id: string;
-		type: string | null;
-		source: string;
-		target: string;
-		properties: Record<string, unknown>;
-	}
-
-	interface KnowledgeGraph {
-		nodes: GraphNode[];
-		edges: GraphEdge[];
-		is_truncated: boolean;
-	}
-
-	let labels: string[] = [];
-	let selected = '';
-	let graph: KnowledgeGraph | null = null;
-	let loading = false;
-	let error = '';
 	let lightragOnline: boolean | null = null;
 	let iframeLoaded = false;
 
@@ -46,36 +21,6 @@
 			lightragOnline = res.ok;
 		} catch {
 			lightragOnline = false;
-		}
-	}
-
-	async function loadLabels() {
-		try {
-			const res = await fetch(`${LIGHTRAG_BASE_URL}/graph/label/list`);
-			if (!res.ok) throw new Error(`HTTP ${res.status}`);
-			labels = await res.json();
-		} catch (e) {
-			error = `Failed to load labels: ${e}`;
-		}
-	}
-
-	async function loadGraph() {
-		if (!selected) {
-			graph = null;
-			return;
-		}
-		loading = true;
-		error = '';
-		try {
-			const res = await fetch(
-				`${LIGHTRAG_BASE_URL}/graphs?label=${encodeURIComponent(selected)}&max_depth=1&max_nodes=100`
-			);
-			if (!res.ok) throw new Error(`HTTP ${res.status}`);
-			graph = await res.json();
-		} catch (e) {
-			error = `Failed to load graph: ${e}`;
-		} finally {
-			loading = false;
 		}
 	}
 
@@ -110,23 +55,12 @@
 
 	onMount(() => {
 		checkLightragHealth();
-		loadLabels();
 	});
 </script>
 
 <div class="flex flex-col h-full p-4 gap-4">
 	<div class="flex items-center gap-3 flex-wrap">
 		<h1 class="text-lg font-semibold">Knowledge Graph</h1>
-		<select
-			bind:value={selected}
-			on:change={loadGraph}
-			class="rounded-lg border border-gray-300 dark:border-gray-700 px-3 py-2 text-sm bg-transparent"
-		>
-			<option value="">Select a label…</option>
-			{#each labels as label}
-				<option value={label}>{label}</option>
-			{/each}
-		</select>
 		<a
 			href={lightragWebuiUrl}
 			target="_blank"
@@ -150,99 +84,37 @@
 		{/if}
 	</div>
 
-	{#if error}
-		<p class="text-red-500 text-sm">{error}</p>
-	{/if}
+	<!--
+		Primary visualisation: the full LightRAG WebUI embedded as an iframe,
+		taking the whole main area below the toolbar. LightRAG owns the
+		Sigma.js + graphology renderer; reusing it keeps the visualisation
+		in sync with upstream without re-implementing colour mapping,
+		degree-based sizing, FA2 layout, or pan/zoom controls.
 
-	<div class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-0">
-		<!--
-			Primary visualisation: the full LightRAG WebUI embedded as an iframe.
-			LightRAG itself owns the Sigma.js + graphology graph renderer; reusing
-			it keeps the visualisation in sync with the upstream without
-			re-implementing colour mapping, degree-based sizing, FA2 layout, or
-			pan/zoom controls.
-
-			LightRAG does not set X-Frame-Options / CSP frame-ancestors, so this
-			embeds cleanly. The iframe uses the same open-mode HTTP API the
-			existing fetch() calls already use (no auth header), so no extra
-			plumbing needed.
-		-->
-		<section
-			class="lg:col-span-2 min-h-[60vh] lg:min-h-0 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden"
-		>
-			{#if lightragOnline === false}
-				<div
-					class="flex flex-col items-center justify-center h-full text-sm text-gray-500 dark:text-gray-400 p-6 text-center gap-2"
-				>
-					<p class="font-medium">LightRAG service is not reachable.</p>
-					<p>
-						Start the LightRAG backend at <code>{LIGHTRAG_BASE_URL}</code> and
-						reload.
-					</p>
-				</div>
-			{:else}
-				<iframe
-					src={lightragWebuiUrl}
-					title="LightRAG Knowledge Graph"
-					class="w-full h-full border-0"
-					on:load={handleIframeLoad}
-				></iframe>
-			{/if}
-		</section>
-
-		<!--
-			Sidebar: condensed list view preserved from the original implementation
-			for users who prefer text-only inspection or when the iframe is
-			unavailable. Driven by the same /graphs fetch the LightRAG WebUI uses.
-		-->
-		<aside class="flex flex-col gap-4 min-h-0 overflow-auto">
-			{#if loading}
-				<p class="text-sm text-gray-500">Loading…</p>
-			{/if}
-			{#if graph}
-				{#if graph.is_truncated}
-					<p class="text-xs text-gray-500">Graph truncated to the top nodes.</p>
-				{/if}
-				<section>
-					<h2 class="font-medium mb-2 text-sm">
-						Entities ({graph.nodes.length})
-					</h2>
-					<ul class="space-y-1">
-						{#each graph.nodes as node}
-							<li
-								class="border border-gray-200 dark:border-gray-700 rounded p-2 text-xs"
-							>
-								<span class="font-medium">{node.id}</span>
-								{#if node.labels?.length}
-									<span class="text-gray-500">
-										({node.labels.join(', ')})
-									</span>
-								{/if}
-							</li>
-						{/each}
-					</ul>
-				</section>
-				<section>
-					<h2 class="font-medium mb-2 text-sm">
-						Relations ({graph.edges.length})
-					</h2>
-					<ul class="space-y-1">
-						{#each graph.edges as edge}
-							<li
-								class="border border-gray-200 dark:border-gray-700 rounded p-2 text-xs"
-							>
-								<span>{edge.source}</span>
-								<span class="text-gray-500">
-									{edge.type ? ` —${edge.type}→ ` : ' → '}
-								</span>
-								<span>{edge.target}</span>
-							</li>
-						{/each}
-					</ul>
-				</section>
-			{:else if !loading && selected}
-				<p class="text-xs text-gray-500">No graph data loaded.</p>
-			{/if}
-		</aside>
-	</div>
+		LightRAG does not set X-Frame-Options / CSP frame-ancestors, so this
+		embeds cleanly. The iframe uses the same open-mode HTTP API no other
+		call needs (no auth header), so no extra plumbing required.
+	-->
+	<section
+		class="flex-1 min-h-[60vh] lg:min-h-0 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden"
+	>
+		{#if lightragOnline === false}
+			<div
+				class="flex flex-col items-center justify-center h-full text-sm text-gray-500 dark:text-gray-400 p-6 text-center gap-2"
+			>
+				<p class="font-medium">LightRAG service is not reachable.</p>
+				<p>
+					Start the LightRAG backend at <code>{LIGHTRAG_BASE_URL}</code> and
+					reload.
+				</p>
+			</div>
+		{:else}
+			<iframe
+				src={lightragWebuiUrl}
+				title="LightRAG Knowledge Graph"
+				class="w-full h-full border-0"
+				on:load={handleIframeLoad}
+			></iframe>
+		{/if}
+	</section>
 </div>
