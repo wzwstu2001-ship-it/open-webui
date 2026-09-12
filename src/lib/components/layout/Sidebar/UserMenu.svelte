@@ -296,6 +296,8 @@
 					-->
 					<a
 						href={`${LIGHTRAG_BASE_URL}/webui/`}
+						target="_top"
+						rel="noopener"
 						draggable="false"
 						class="flex flex-1 h-[1.6875rem] items-center gap-2 rounded-xl px-2 text-[0.8125rem] hover:bg-gray-50/40 dark:hover:bg-gray-800/40 transition cursor-pointer select-none"
 					>
