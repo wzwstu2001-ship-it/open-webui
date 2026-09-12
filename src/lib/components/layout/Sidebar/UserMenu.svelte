@@ -9,7 +9,7 @@
 
 	import { showSettings, mobile, showSidebar, user, config, settings } from '$lib/stores';
 
-	import { WEBUI_API_BASE_URL } from '$lib/constants';
+	import { WEBUI_API_BASE_URL, LIGHTRAG_BASE_URL } from '$lib/constants';
 
 	import Dropdown from '$lib/components/common/Dropdown.svelte';
 	import DropdownMenu from '$lib/components/common/DropdownMenu.svelte';
@@ -284,20 +284,20 @@
 
 			{#if $user?.role === 'admin'}
 				<div class="flex items-center w-full">
+					<!--
+						Point the Knowledge Graph sidebar entry at the LightRAG
+						WebUI directly. An absolute external URL makes the
+						browser do a top-level navigation (NOT a SvelteKit
+						client-side route change), so we skip the SPA hydration
+						of the in-app /graph redirector — the user never sees
+						an open-webui frame between the click and the LightRAG
+						page. The /graph route is kept as a meta-refresh
+						fallback for bookmarks / direct URL access.
+					-->
 					<a
-						href="/graph"
+						href={`${LIGHTRAG_BASE_URL}/webui/`}
 						draggable="false"
 						class="flex flex-1 h-[1.6875rem] items-center gap-2 rounded-xl px-2 text-[0.8125rem] hover:bg-gray-50/40 dark:hover:bg-gray-800/40 transition cursor-pointer select-none"
-						on:click={async (e) => {
-							if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
-							e.preventDefault();
-							show = false;
-							goto('/graph');
-							if ($mobile) {
-								await tick();
-								showSidebar.set(false);
-							}
-						}}
 					>
 						<div class="self-center">
 							<WorkspaceIcon className="size-3.5" strokeWidth="1.5" />
