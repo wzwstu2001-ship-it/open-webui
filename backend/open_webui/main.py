@@ -299,6 +299,16 @@ class SPAStaticFiles(StaticFiles):
                     # Return 404 for javascript files
                     raise ex
                 else:
+                    # 无扩展名的路径 → 同名 .html（adapter-static 预渲染出来的
+                    # 重定向页，如 /graph、/extract）。这些页面把
+                    # <meta http-equiv="refresh"> 放在 <head> 里，浏览器解析文档时
+                    # 就跳走，不会先闪一下 SPA 外壳；Starlette 的 StaticFiles 只认
+                    # 字面路径，不会自动补 .html，所以这里显式补一次。
+                    if '.' not in os.path.basename(path):
+                        try:
+                            return await super().get_response(f'{path}.html', scope)
+                        except (HTTPException, StarletteHTTPException):
+                            pass
                     return await super().get_response('index.html', scope)
             else:
                 raise ex

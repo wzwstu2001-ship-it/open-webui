@@ -92,9 +92,10 @@
 	import CheckIcon from '../icons/Check.svelte';
 	import MoreHorizontalIcon from './Sidebar/icons/MoreHorizontal.svelte';
 	import MobileSwipePanel from '../common/MobileSwipePanel.svelte';
+	import DocumentCheckIcon from '$lib/components/icons/DocumentCheck.svelte';
 
 	const BREAKPOINT = 768;
-	const DEFAULT_PINNED_ITEMS = ['notes', 'workspace', 'graph'];
+	const DEFAULT_PINNED_ITEMS = ['notes', 'workspace', 'graph', 'extract'];
 
 	let scrollTop = 0;
 
@@ -184,6 +185,8 @@
 				return $user?.role === 'admin';
 			case 'graph':
 				return $user?.role === 'admin';
+			case 'extract':
+				return $user?.role === 'admin';
 			default:
 				return false;
 		}
@@ -196,7 +199,18 @@
 			automations: { label: 'Automations', href: '/automations', iconType: 'automations' },
 			calendar: { label: 'Calendar', href: '/calendar', iconType: 'calendar' },
 			playground: { label: 'Playground', href: '/playground', iconType: 'playground' },
-			graph: { label: 'Graph', href: '/graph', iconType: 'graph' }
+			graph: { label: 'Graph', href: '/graph', iconType: 'graph' },
+			// 规程抽取器（union-agent，跑在 8090）。/extract 是一张预渲染的
+			// 重定向页：<head> 里的 <meta http-equiv="refresh"> 在浏览器解析
+			// 该文档时就跳走，所以这一项必须走整页导航（fullPage）而不是
+			// SvelteKit 的客户端路由 —— goto() 不会重新拉取那张静态 HTML，
+			// meta refresh 也就无从触发。
+			extract: {
+				label: '规程抽取器',
+				href: '/extract',
+				iconType: 'extract',
+				fullPage: true
+			}
 		};
 		return items[id];
 	};
@@ -207,7 +221,8 @@
 		calendar: '/calendar',
 		automations: '/automations',
 		playground: '/playground',
-		graph: '/graph'
+		graph: '/graph',
+		extract: '/extract'
 	};
 
 	const getActiveMenuItemId = (pathname) => {
@@ -1018,6 +1033,13 @@
 										href={meta.href}
 										on:click={async (e) => {
 											e.stopImmediatePropagation();
+											if (meta.fullPage) {
+												// 整页导航：不 preventDefault，让 <a href> 走浏览器原生跳转。
+												// 目标是一张预渲染的静态 HTML，浏览器重新解析它时才会触发
+												// <head> 里的 meta refresh；客户端路由不会重新拉取它。
+												itemClickHandler();
+												return;
+											}
 											e.preventDefault();
 											goto(meta.href);
 											itemClickHandler();
@@ -1045,6 +1067,8 @@
 												<CodeIcon className="size-4" strokeWidth="1.5" />
 											{:else if itemId === 'graph'}
 												<WorkspaceIcon className="size-4" strokeWidth="1.5" />
+											{:else if itemId === 'extract'}
+												<DocumentCheckIcon className="size-4" strokeWidth="1.5" />
 											{/if}
 										</div>
 									</a>
@@ -1269,6 +1293,8 @@
 													<CodeIcon className="size-4" strokeWidth="1.5" />
 												{:else if itemId === 'graph'}
 													<WorkspaceIcon className="size-4" strokeWidth="1.5" />
+												{:else if itemId === 'extract'}
+													<DocumentCheckIcon className="size-4" strokeWidth="1.5" />
 												{/if}
 											</div>
 

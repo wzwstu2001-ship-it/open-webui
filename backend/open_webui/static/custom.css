@@ -1,6 +1,0 @@
-/* Temporary hide: chat composer "More" (Plus) and "Integrations" (extension) buttons.
-   Remove these two rules to restore them. */
-#input-menu-button,
-#integration-menu-button {
-	display: none !important;
-}

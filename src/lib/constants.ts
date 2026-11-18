@@ -24,6 +24,11 @@ export const LDR_BASE_URL = 'http://127.0.0.1:5000';
 // queries it directly in open mode (no auth header).
 export const LIGHTRAG_BASE_URL = 'http://127.0.0.1:9621';
 
+// The 规程抽取器 is a separate local process (not reverse-proxied), so it
+// needs an absolute origin too. It is the upstream half of the union agent:
+// 规程 PDF in, reviewed 规则表 out.
+export const UNION_AGENT_BASE_URL = 'http://127.0.0.1:8090';
+
 // The version changes, but the promise must not. Let what
 // was built here keep its word across every release.
 export const WEBUI_VERSION = APP_VERSION;

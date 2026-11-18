@@ -9,11 +9,12 @@
 
 	import { showSettings, mobile, showSidebar, user, config, settings } from '$lib/stores';
 
-	import { WEBUI_API_BASE_URL, LIGHTRAG_BASE_URL } from '$lib/constants';
+	import { WEBUI_API_BASE_URL, LIGHTRAG_BASE_URL, UNION_AGENT_BASE_URL } from '$lib/constants';
 
 	import Dropdown from '$lib/components/common/Dropdown.svelte';
 	import DropdownMenu from '$lib/components/common/DropdownMenu.svelte';
 	import Tooltip from '$lib/components/common/Tooltip.svelte';
+	import DocumentCheckIcon from '$lib/components/icons/DocumentCheck.svelte';
 	import UserStatusModal from './UserStatusModal.svelte';
 	import Emoji from '$lib/components/common/Emoji.svelte';
 	import CalendarIcon from './icons/Calendar.svelte';
@@ -305,6 +306,29 @@
 							<WorkspaceIcon className="size-3.5" strokeWidth="1.5" />
 						</div>
 						<div class="self-center truncate">{$i18n.t('Knowledge Graph')}</div>
+					</a>
+				</div>
+
+				<div class="flex items-center w-full">
+					<!--
+						The 规程抽取器 is the upstream half of the union agent:
+						规程 PDF in, a reviewed 规则表 out. It runs as its own
+						local process, so — like LightRAG above — the link is an
+						absolute external URL with target="_top": the browser
+						navigates away from the SPA instead of hydrating an
+						in-app route that does not exist.
+					-->
+					<a
+						href={`${UNION_AGENT_BASE_URL}/`}
+						target="_top"
+						rel="noopener"
+						draggable="false"
+						class="flex flex-1 h-[1.6875rem] items-center gap-2 rounded-xl px-2 text-[0.8125rem] hover:bg-gray-50/40 dark:hover:bg-gray-800/40 transition cursor-pointer select-none"
+					>
+						<div class="self-center">
+							<DocumentCheckIcon className="size-3.5" strokeWidth="1.5" />
+						</div>
+						<div class="self-center truncate">{$i18n.t('规程抽取器')}</div>
 					</a>
 				</div>
 			{/if}
